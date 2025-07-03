@@ -1,0 +1,90 @@
+<!-- (mesmo início do código anterior, mantido igual para consistência) -->
+
+<!-- ... até o final do <body> com esse novo script: -->
+<script>
+  const curiosidades = [
+    "Gatos têm memória melhor do que cachorros.",
+    "Gatos podem dormir até 16 horas por dia.",
+    "O nariz do gato é único, como uma digital.",
+    "Gatos odeiam água porque seus pelos demoram a secar."
+  ];
+
+  let jogador = "X";
+  let tabuleiro = Array(9).fill("");
+  const tabuleiroDiv = document.getElementById("tabuleiro");
+  const mensagem = document.getElementById("mensagem");
+  const somMiado = document.getElementById("som-miau");
+
+  function verificarVitoria(simbolo) {
+    const vitorias = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    return vitorias.some(c => {
+      const [a,b,c3] = c;
+      return tabuleiro[a] === simbolo && tabuleiro[b] === simbolo && tabuleiro[c3] === simbolo;
+    });
+  }
+
+  function reiniciarJogo() {
+    tabuleiro = Array(9).fill("");
+    renderizarTabuleiro();
+    mensagem.textContent = "";
+    jogador = "X";
+  }
+
+  function jogar(i) {
+    if (tabuleiro[i] || verificarVitoria("X") || verificarVitoria("O")) return;
+    tabuleiro[i] = "X";
+    renderizarTabuleiro();
+
+    if (verificarVitoria("X")) {
+      somMiado.play(); // 🔊 toca o miado
+      mensagem.textContent = "Você venceu! 🎉 " + curiosidades[Math.floor(Math.random() * curiosidades.length)];
+      setTimeout(reiniciarJogo, 3500);
+      return;
+    }
+
+    setTimeout(() => {
+      let jogadasDisponiveis = tabuleiro.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+      if (jogadasDisponiveis.length === 0) {
+        mensagem.textContent = "Empate! 😺";
+        setTimeout(reiniciarJogo, 3000);
+        return;
+      }
+      let jogadaIA = jogadasDisponiveis[Math.floor(Math.random() * jogadasDisponiveis.length)];
+      tabuleiro[jogadaIA] = "O";
+      renderizarTabuleiro();
+
+      if (verificarVitoria("O")) {
+        mensagem.textContent = "O site venceu! 🐾";
+        setTimeout(reiniciarJogo, 3000);
+      }
+    }, 500);
+  }
+
+  function renderizarTabuleiro() {
+    tabuleiroDiv.innerHTML = "";
+    tabuleiro.forEach((valor, i) => {
+      const div = document.createElement("div");
+      div.className = "casa";
+      div.textContent = valor;
+      div.onclick = () => jogar(i);
+      tabuleiroDiv.appendChild(div);
+    });
+  }
+
+  function showTab(id) {
+    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    event.target.classList.add("active");
+  }
+
+  function miau() {
+    somMiado.play();
+  }
+
+  renderizarTabuleiro();
+</script>
